@@ -2,13 +2,13 @@ import pandas as pd
 
 # Define the model names and Datasets
 models = ["Autoformer", "Crossformer", "FEDformer", "PatchTST", "iTransformer", "TimesNet", "Transformer"]
-Datasets = ["weather"]
+Datasets = ["ETTm1","ETTm2","ETTh1","ETTh2"]
 seeds = ['_42','_123','_456','_789','_1011']
 plens = ['pl96','pl192','pl336','pl720']
-variants = ['noSkipTrue','FDCTrue']
+variants = ['noSkipTrue','FDCTrue','MLP']
 
 # Read the input text file and process it
-input_file = "./eval_results/mi_results_weather_convd.txt"  # Replace with your text file name
+input_file = "./eval_results/mi_results.txt"  # Replace with your text file name
 records = []
 with open(input_file, 'r') as file:
     lines = file.readlines()
@@ -52,4 +52,4 @@ df = pd.DataFrame(records)
 # Reshape the data for comparison
 # comparison_table = df.pivot(index="Dataset", columns="Model", values=["self_mi", "cross_mi", "mse", "mae"])
 
-df.to_csv('./mi_extracted_weather_convd.csv')
+df.to_csv('./mi_extracted_ETT.csv')
