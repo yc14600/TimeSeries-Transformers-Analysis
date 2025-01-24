@@ -54,13 +54,13 @@ class Model(nn.Module):
         self.output_attention = configs.output_attention
         padding = stride
         
-        self.cross_channel=configs.cross_channel
         self.no_skip=configs.no_skip
         self.fuse_decoder=configs.fuse_decoder
+        self.decoder_type=configs.decoder_type
 
         # patching and embedding
         self.patch_embedding = PatchEmbedding(
-            configs.d_model, patch_len, stride, padding, configs.dropout,cross_channel=self.cross_channel)
+            configs.d_model, patch_len, stride, padding, configs.dropout)
 
         # Encoder
         self.encoder = Encoder(
@@ -114,11 +114,12 @@ class Model(nn.Module):
 
     def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
         # Normalization from Non-stationary Transformer
-        means = x_enc.mean(1, keepdim=True).detach()
-        x_enc = x_enc - means
-        stdev = torch.sqrt(
-            torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5)
-        x_enc /= stdev
+        if self.decoder_type != 'noNorm':
+            means = x_enc.mean(1, keepdim=True).detach()
+            x_enc = x_enc - means
+            stdev = torch.sqrt(
+                torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5)
+            x_enc /= stdev
 
         # do patching and embedding
         x_enc = x_enc.permute(0, 2, 1)
@@ -139,10 +140,11 @@ class Model(nn.Module):
         dec_out = dec_out.permute(0, 2, 1)
 
         # De-Normalization from Non-stationary Transformer
-        dec_out = dec_out * \
-                  (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
-        dec_out = dec_out + \
-                  (means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
+        if self.decoder_type != 'noNorm':
+            dec_out = dec_out * \
+                    (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
+            dec_out = dec_out + \
+                    (means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
         if self.output_attention:
             return dec_out, attns
         return dec_out

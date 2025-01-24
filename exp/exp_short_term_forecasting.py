@@ -214,6 +214,7 @@ class Exp_Short_Term_Forecast(Exp_Basic):
             f.write('\n')
             f.close()
             
+            x = x.cpu().numpy()
             for i in range(0, preds.shape[0], preds.shape[0] // 10):
                 gt = np.concatenate((x[i, :, 0], trues[i]), axis=0)
                 pd = np.concatenate((x[i, :, 0], preds[i]), axis=0)

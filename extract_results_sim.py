@@ -1,14 +1,14 @@
 import pandas as pd
 
 # Define the model names and Datasets
-models = ["Autoformer", "Crossformer", "FEDformer", "PatchTST", "iTransformer", "TimesNet", "Transformer","iTrsNSK","iTransNSKFlat","iTrsFlat"]
+models = ["Autoformer", "Crossformer", "FEDformer", "PatchTST", "iTransformer", "TimeXer", "Transformer"]
 Datasets = ["idp", "dp02", "dp04", "dp06", "dp08", "dp10"]
-seeds = ['_42','_123','_456','_789','_1011']
+seeds = ['_42','_123','_456']
 plens = ['pl96','pl192','pl336','pl720']
 variants = ['noSkipTrue','FDCTrue']
 
 # Read the input text file and process it
-input_file = "./eval_results/mi_results_synthetic.txt"  # Replace with your text file name
+input_file = "./eval_results_delta/mi_results_tasks/max/mi_results_synthetic.txt"  # Replace with your text file name
 records = []
 with open(input_file, 'r') as file:
     lines = file.readlines()
@@ -52,4 +52,4 @@ df = pd.DataFrame(records)
 # Reshape the data for comparison
 # comparison_table = df.pivot(index="Dataset", columns="Model", values=["self_mi", "cross_mi", "mse", "mae"])
 
-df.to_csv('./mi_extracted.csv')
+df.to_csv('./mi_extracted_synthetic3.csv')

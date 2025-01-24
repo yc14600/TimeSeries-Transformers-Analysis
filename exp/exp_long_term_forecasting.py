@@ -1,7 +1,7 @@
 from data_provider.data_factory import data_provider
 from exp.exp_basic import Exp_Basic
 from utils.tools import EarlyStopping, adjust_learning_rate, visual
-from utils.metrics import metric
+# from utils.metrics import metric
 import torch
 import torch.nn as nn
 from torch import optim
@@ -9,9 +9,10 @@ import os
 import time
 import warnings
 import numpy as np
-from utils.dtw_metric import dtw,accelerated_dtw
-from utils.augmentation import run_augmentation,run_augmentation_single
+# from utils.dtw_metric import dtw,accelerated_dtw
+# from utils.augmentation import run_augmentation,run_augmentation_single
 #from memory_profiler import memory_usage
+from torch.nn import L1Loss,MSELoss
 
 warnings.filterwarnings('ignore')
 
@@ -182,7 +183,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
             adjust_learning_rate(model_optim, epoch + 1, self.args)
             
         best_model_path = path + '/' + 'checkpoint.pth'
-        self.model.load_state_dict(torch.load(best_model_path,map_location=self.device))
+        if os.path.exists(best_model_path):
+            self.model.load_state_dict(torch.load(best_model_path,map_location=self.device))
 
         return self.model
 
@@ -195,15 +197,18 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         # test_data.data_y = test_data.data_y.to(self.device)
         # test_data.data_stamp = test_data.data_stamp.to(self.device)
         if test:
-            print('loading model')
-            self.model.load_state_dict(torch.load(os.path.join(self.args.checkpoints, setting,'checkpoint.pth'),map_location=self.device))
-            self.model = self.model.to(self.device)
+            model_path = os.path.join(self.args.checkpoints, setting,'checkpoint.pth')
+            if os.path.exists(model_path):
+                print('loading model')
+                self.model.load_state_dict(torch.load(os.path.join(self.args.checkpoints, setting,'checkpoint.pth'),map_location=self.device))
+                self.model = self.model.to(self.device)
         preds = []
         trues = []
         folder_path = os.path.join(root_path,'test_results/',setting + '/')
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
+        tot_mae,tot_mse = 0.,0.
         self.model.eval()
         with torch.no_grad():
             for i, data_batch in enumerate(test_loader):
@@ -217,51 +222,53 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
                 pred = outputs
                 true = batch_y
+                mae_i = L1Loss()(pred, true)
+                mse_i = MSELoss()(pred, true)
+                tot_mae += mae_i
+                tot_mse += mse_i
+        mae = tot_mae / len(test_loader)
+        mse = tot_mse / len(test_loader)
+        # preds = torch.concat(preds, dim=0)
+        # trues = torch.concat(trues, dim=0)
+        # print('test shape:', preds.shape, trues.shape)
+        # preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
+        # trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
+        # print('test shape:', preds.shape, trues.shape)
 
-                preds.append(pred)
-                trues.append(true)
-                
-        preds = torch.concat(preds, dim=0)
-        trues = torch.concat(trues, dim=0)
-        print('test shape:', preds.shape, trues.shape)
-        preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
-        trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
-        print('test shape:', preds.shape, trues.shape)
-
-        if self.args.data == 'PEMS':
-            B, T, C = preds.shape
-            preds = test_data.inverse_transform(preds.reshape(-1, C)).reshape(B, T, C)
-            trues = test_data.inverse_transform(trues.reshape(-1, C)).reshape(B, T, C)
+        # if self.args.data == 'PEMS':
+        #     B, T, C = preds.shape
+        #     preds = test_data.inverse_transform(preds.reshape(-1, C)).reshape(B, T, C)
+        #     trues = test_data.inverse_transform(trues.reshape(-1, C)).reshape(B, T, C)
         # result save
         folder_path = os.path.join(root_path,'results',setting + '/') 
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
         
         # dtw calculation
-        if self.args.use_dtw:
-            dtw_list = []
-            manhattan_distance = lambda x, y: np.abs(x - y)
-            for i in range(preds.shape[0]):
-                x = preds[i].reshape(-1,1)
-                y = trues[i].reshape(-1,1)
-                if i % 100 == 0:
-                    print("calculating dtw iter:", i)
-                d, _, _, _ = accelerated_dtw(x, y, dist=manhattan_distance)
-                dtw_list.append(d)
-            dtw = np.array(dtw_list).mean()
-        else:
-            dtw = -999
+        # if self.args.use_dtw:
+        #     dtw_list = []
+        #     manhattan_distance = lambda x, y: np.abs(x - y)
+        #     for i in range(preds.shape[0]):
+        #         x = preds[i].reshape(-1,1)
+        #         y = trues[i].reshape(-1,1)
+        #         if i % 100 == 0:
+        #             print("calculating dtw iter:", i)
+        #         d, _, _, _ = accelerated_dtw(x, y, dist=manhattan_distance)
+        #         dtw_list.append(d)
+        #     dtw = np.array(dtw_list).mean()
+        # else:
+        #     dtw = -999
             
 
-        mae, mse, rmse, mape, mspe = metric(preds.cpu().numpy(), trues.cpu().numpy())
-        print('mse:{}, mae:{}, dtw:{}'.format(mse, mae, dtw))
-        print('mse{},mae:{}, mape1:{}, rmse:{},mspe:{}'.format(mse,mae, mape, rmse,mspe))            
+        # mae, mse, rmse, mape, mspe = metric(preds.cpu().numpy(), trues.cpu().numpy())
+        print('mse:{}, mae:{}'.format(mse, mae))
+        # print('mse{},mae:{}, mape1:{}, rmse:{},mspe:{}'.format(mse,mae, mape, rmse,mspe))            
         f = open("result_long_term_forecast.txt", 'a')
         f.write(setting + "  \n")
-        if self.args.data == 'PEMS':
-            f.write('mse{},mae:{}, mape:{}, rmse:{}'.format(mse,mae, mape, rmse))
-        else:
-            f.write('mse:{}, mae:{}, dtw:{}'.format(mse, mae, dtw))
+        # if self.args.data == 'PEMS':
+        #     f.write('mse{},mae:{}, mape:{}, rmse:{}'.format(mse,mae, mape, rmse))
+        # else:
+        f.write('mse:{}, mae:{}'.format(mse, mae))
         f.write('\n')
         f.write('\n')
         f.close()

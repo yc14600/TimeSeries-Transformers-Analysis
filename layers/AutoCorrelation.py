@@ -161,5 +161,5 @@ class AutoCorrelationLayer(nn.Module):
             attn_mask
         )
         out = out.view(B, L, -1)
-
+        ## iteraction between channels is from self.out_projection 
         return self.out_projection(out), attn

@@ -45,6 +45,7 @@ if __name__ == '__main__':
     parser.add_argument('--freq', type=str, default='h',
                         help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
     parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
+    parser.add_argument('--load2device', action='store_true', help='load whole dataset to device', default=False)
 
     # forecasting task
     parser.add_argument('--seq_len', type=int, default=96, help='input sequence length')
@@ -161,6 +162,8 @@ if __name__ == '__main__':
     parser.add_argument('--cp_heads', type=int, default=4, help='number of heads of token component encoders')
     parser.add_argument('--cp_d_ff', type=int, default=128, help='feedfoward layer of token component encoders')
     parser.add_argument('--cp_d_model', type=int, default=96, help='embedding size of token component encoders')
+    # TimeXer
+    parser.add_argument('--patch_len', type=int, default=16, help='patch length')
 
 
     
@@ -239,26 +242,29 @@ if __name__ == '__main__':
         args.fuse_decoder,
         args.decoder_type,
         args.seed)
-
+    mse, mae = 0., 0.
     exp = Exp(args)  # set experiments
     print('device:', exp.device)    
     print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
-    mse,mae = exp.test(setting, test=1)
-    print('testing done')
-    
+    # mse,mae = exp.test(setting, test=1)
+    # print('testing done')
+    print('loading model')
+    exp.model.load_state_dict(torch.load(os.path.join(exp.args.checkpoints, setting,'checkpoint.pth'),map_location=exp.device))
+    exp.model = exp.model.to(exp.device)
+    exp.model.eval()
+    print('model loaded')
     test_data, test_loader = exp._get_data(flag='test')
     # test_data.data_x = test_data.data_x.to(exp.device)
     # test_data.data_y = test_data.data_y.to(exp.device)
     # test_data.data_stamp = test_data.data_stamp.to(exp.device)
     self_mi, cross_mi = 0., 0.
-    exp.model = exp.model.to(exp.device)
-    exp.model.eval()
+
     preds = []
     trues = []
     
 
     eye_mask = torch.eye(args.enc_in).to(exp.device)
-    
+    cross_mi_mt = 0.
     with torch.no_grad():
         for i, data_batch in enumerate(test_loader):
             # outputs, batch_y = exp.model_feed_loop(data_batch)
@@ -325,11 +331,14 @@ if __name__ == '__main__':
             # print('batch sdv',sdv)
             self_mi += (sdv * eye_mask).sum()/sdv.shape[0]
             cross_mi += (sdv * (1-eye_mask)).sum()/(sdv.shape[0]*(sdv.shape[0]-1))
-            
-            
+            cross_mi_mt += (sdv * (1-eye_mask))
+            if (i+1)==100:
+                break
+    cross_mi_mt /= (i+1)
+    max_cross_mi = (cross_mi_mt * (1-eye_mask)).max()        
     self_mi/=(i+1)
     cross_mi/=(i+1)
-    print('iters',i+1,'Self MI:', self_mi, 'Cross MI:', cross_mi)
+    print('iters',i+1,'Self MI:', self_mi, 'Cross MI:', cross_mi,'max cross MI', max_cross_mi)
         
     # preds = np.concatenate(preds, axis=0)
     # trues = np.concatenate(trues, axis=0)
@@ -343,6 +352,6 @@ if __name__ == '__main__':
     
     with open('./eval_results/mi_results.txt','a') as f:
         f.write(setting + "  \n")
-        f.write('self_mi:{},cross_mi:{},mse:{},mae:{}\n'.format(self_mi,cross_mi,mse,mae))
+        f.write('self_mi:{},cross_mi:{},mse:{},mae:{},max_cross_mi:{}\n'.format(self_mi,cross_mi,mse,mae,max_cross_mi))
     
     torch.cuda.empty_cache()

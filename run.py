@@ -35,6 +35,7 @@ if __name__ == '__main__':
     parser.add_argument('--freq', type=str, default='h',
                         help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
     parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
+    parser.add_argument('--load2device', action='store_true', help='load whole dataset to device', default=False)
 
     # forecasting task
     parser.add_argument('--seq_len', type=int, default=96, help='input sequence length')
@@ -91,6 +92,9 @@ if __name__ == '__main__':
     parser.add_argument('--patch_size', type=int, default=16)
     parser.add_argument('--stride', type=int, default=8)
     parser.add_argument('--method', type=str, default='PAttn')
+    
+    # TimeXer
+    parser.add_argument('--patch_len', type=int, default=16, help='patch length')
 
     # optimization
     parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')

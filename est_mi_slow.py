@@ -42,7 +42,8 @@ if __name__ == '__main__':
     parser.add_argument('--target', type=str, default='OT', help='target feature in S or MS task')
     parser.add_argument('--freq', type=str, default='h',
                         help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
-    parser.add_argument('--checkpoints', type=str, default='./checkpoints_a/', help='location of model checkpoints')
+    parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
+    parser.add_argument('--load2device', action='store_true', help='load whole dataset to device', default=False)
 
     # forecasting task
     parser.add_argument('--seq_len', type=int, default=96, help='input sequence length')
@@ -91,6 +92,12 @@ if __name__ == '__main__':
                         help='down sampling method, only support avg, max, conv')
     parser.add_argument('--seg_len', type=int, default=48,
                         help='the length of segmen-wise iteration of SegRNN')
+    parser.add_argument('--no_skip', default=False, action="store_true", help="NO skip connection in transformer")
+    parser.add_argument('--fuse_decoder', default=False, action="store_true", help="Add a fuse layer to decoder projection")
+    parser.add_argument('--decoder_type', type=str, default='conv2d', help="the type of the fuse layer in decoder projection, can be conv2d and MLP")
+ 
+    # TimeXer
+    parser.add_argument('--patch_len', type=int, default=16, help='patch length')
 
     # optimization
     parser.add_argument('--num_workers', type=int, default=0, help='data loader num workers')
@@ -210,7 +217,7 @@ if __name__ == '__main__':
     print('Exp:', Exp)
  
     ii = 0
-    setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_expand{}_dc{}_fc{}_eb{}_dt{}_{}_{}'.format(
+    setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_expand{}_dc{}_fc{}_eb{}_dt{}_{}_noSkip{}_FDC{}_{}_{}'.format(
         args.task_name,
         args.model_id,
         args.model,
@@ -229,21 +236,29 @@ if __name__ == '__main__':
         args.factor,
         args.embed,
         args.distil,
-        args.des, args.seed)
-
+        args.des, 
+        args.no_skip,
+        args.fuse_decoder,
+        args.decoder_type,
+        args.seed)
+    mse, mae = 0., 0.
     exp = Exp(args)  # set experiments
     print('device:', exp.device)    
     print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
-    exp.test(setting, test=1)
-    print('testing done')
+    # mse,mae = exp.test(setting, test=1)
+    # print('testing done')
+    print('loading model')
+    exp.model.load_state_dict(torch.load(os.path.join(exp.args.checkpoints, setting,'checkpoint.pth'),map_location=exp.device))
+    exp.model = exp.model.to(exp.device)
+    exp.model.eval()
+    print('model loaded')
     
     test_data, test_loader = exp._get_data(flag='test')
     # test_data.data_x = test_data.data_x.to(exp.device)
     # test_data.data_y = test_data.data_y.to(exp.device)
     # test_data.data_stamp = test_data.data_stamp.to(exp.device)
     self_mi, cross_mi = 0., 0.
-    exp.model = exp.model.to(exp.device)
-    exp.model.eval()
+
     preds = []
     trues = []
     
@@ -253,7 +268,7 @@ if __name__ == '__main__':
     # This mask will be True where we need to apply the permutation
 
     eye_mask = torch.eye(args.enc_in).to(exp.device)
-    
+    cross_mi_mt = 0.
 
     
     with torch.no_grad():
@@ -318,11 +333,14 @@ if __name__ == '__main__':
                 
             self_mi += (sdv * eye_mask).sum()/sdv.shape[0]
             cross_mi += (sdv * (1-eye_mask)).sum()/(sdv.shape[0]*(sdv.shape[0]-1))
-            
-            
+            cross_mi_mt += (sdv * (1-eye_mask))
+            if (i+1)==10:
+                break
+    cross_mi_mt /= (i+1)
+    max_cross_mi = (cross_mi_mt * (1-eye_mask)).max()       
     self_mi/=(i+1)
     cross_mi/=(i+1)
-    print('iters',i+1,'Self MI:', self_mi, 'Cross MI:', cross_mi)
+    print('iters',i+1,'Self MI:', self_mi, 'Cross MI:', cross_mi,'max cross MI', max_cross_mi)
         
     # preds = np.concatenate(preds, axis=0)
     # trues = np.concatenate(trues, axis=0)
@@ -336,6 +354,6 @@ if __name__ == '__main__':
     
     with open('./eval_results/mi_results.txt','a') as f:
         f.write(setting + "  \n")
-        f.write('self_mi:{},cross_mi:{}\n'.format(self_mi,cross_mi))
+        f.write('self_mi:{},cross_mi:{},mse:{},mae:{},max_cross_mi:{}\n'.format(self_mi,cross_mi,mse,mae,max_cross_mi))
     
     torch.cuda.empty_cache()

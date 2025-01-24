@@ -19,6 +19,7 @@ class Model(nn.Module):
         self.pred_len = configs.pred_len
         self.output_attention = configs.output_attention
         self.no_skip = configs.no_skip
+        print('no_skip',self.no_skip)
         self.fuse_decoder = configs.fuse_decoder
         self.decoder_type = configs.decoder_type
         
@@ -80,12 +81,14 @@ class Model(nn.Module):
     def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
         # Normalization from Non-stationary Transformer
         # print('x_enc 0',x_enc.shape,x_mark_enc.shape)
-        means = x_enc.mean(1, keepdim=True).detach()
-        # print('means',means.shape)  
-        x_enc = x_enc - means
-        stdev = torch.sqrt(torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5).detach()
-        # print('stdev',stdev.shape)  
-        x_enc = x_enc / stdev
+        if self.decoder_type != 'noNorm':
+            
+            means = x_enc.mean(1, keepdim=True).detach()
+            # print('means',means.shape)  
+            x_enc = x_enc - means
+            stdev = torch.sqrt(torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5).detach()
+            # print('stdev',stdev.shape)  
+            x_enc = x_enc / stdev
         # print('x_enc 1',x_enc.shape,x_mark_enc.shape)   
         _, _, N = x_enc.shape
 
@@ -115,9 +118,10 @@ class Model(nn.Module):
         dec_out = self.projection(enc_out)           
         dec_out = dec_out.permute(0, 2, 1)[:, :, :N]
         # De-Normalization from Non-stationary Transformer
-        dec_out = dec_out * (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
-        dec_out = dec_out + (means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
-        
+        if self.decoder_type != 'noNorm':
+            dec_out = dec_out * (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
+            dec_out = dec_out + (means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
+            
         if self.output_attention:
             return dec_out, attns
         return dec_out
