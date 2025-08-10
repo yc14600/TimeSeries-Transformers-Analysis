@@ -28,7 +28,7 @@ do
         --c_out 7 \
         --des 'Exp' \
         --n_heads 2 \
-        --decoder_type noNorm \
+        --no_zero_norm \
         --itr 1
     
     python -u run.py \
@@ -53,7 +53,7 @@ do
         --c_out 7 \
         --des 'Exp' \
         --n_heads 2 \
-        --decoder_type noNorm \
+        --no_zero_norm \
         --itr 1
 
     python -u run.py \
@@ -78,7 +78,7 @@ do
         --c_out 7 \
         --des 'Exp' \
         --n_heads 2 \
-        --decoder_type noNorm \
+        --no_zero_norm \
         --itr 1
 
     python -u run.py \
@@ -103,7 +103,7 @@ do
         --c_out 7 \
         --des 'Exp' \
         --n_heads 2 \
-        --decoder_type noNorm \
+        --no_zero_norm \
         --itr 1
 
     python -u est_mi.py \
@@ -128,7 +128,7 @@ do
         --c_out 7 \
         --des 'Exp' \
         --n_heads 2 \
-        --decoder_type noNorm \
+        --no_zero_norm \
         --itr 1
     
     python -u est_mi.py \
@@ -153,7 +153,7 @@ do
         --c_out 7 \
         --des 'Exp' \
         --n_heads 2 \
-        --decoder_type noNorm \
+        --no_zero_norm \
         --itr 1
 
     python -u est_mi.py \
@@ -178,7 +178,7 @@ do
         --c_out 7 \
         --des 'Exp' \
         --n_heads 2 \
-        --decoder_type noNorm \
+        --no_zero_norm \
         --itr 1
 
     python -u est_mi.py \
@@ -203,7 +203,7 @@ do
         --c_out 7 \
         --des 'Exp' \
         --n_heads 2 \
-        --decoder_type noNorm \
+        --no_zero_norm \
         --itr 1
     done
 done

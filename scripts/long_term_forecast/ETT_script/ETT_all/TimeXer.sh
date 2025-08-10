@@ -27,7 +27,7 @@ do
     --d_model 256 \
     --des 'Exp' \
     --seed $SEED \
-    --decoder_type noNorm \
+    --no_zero_norm \
     --itr 1 
   
   python -u run.py \
@@ -51,7 +51,7 @@ do
     --d_model 256 \
     --des 'Exp' \
     --seed $SEED \
-    --decoder_type noNorm \
+    --no_zero_norm \
     --itr 1
 
   python -u run.py \
@@ -75,7 +75,7 @@ do
     --d_model 256 \
     --des 'Exp' \
     --seed $SEED \
-    --decoder_type noNorm \
+    --no_zero_norm \
     --itr 1
 
   python -u run.py \
@@ -99,7 +99,7 @@ do
     --d_model 256 \
     --des 'Exp' \
     --seed $SEED \
-    --decoder_type noNorm \
+    --no_zero_norm \
     --itr 1
 
     python -u est_mi.py \
@@ -123,7 +123,7 @@ do
     --d_model 256 \
     --des 'Exp' \
     --seed $SEED \
-    --decoder_type noNorm \
+    --no_zero_norm \
     --itr 1 
   
   python -u est_mi.py \
@@ -147,7 +147,7 @@ do
     --d_model 256 \
     --des 'Exp' \
     --seed $SEED \
-    --decoder_type noNorm \
+    --no_zero_norm \
     --itr 1
 
   python -u est_mi.py \
@@ -171,7 +171,7 @@ do
     --d_model 256 \
     --des 'Exp' \
     --seed $SEED \
-    --decoder_type noNorm \
+    --no_zero_norm \
     --itr 1
 
   python -u est_mi.py \
@@ -195,7 +195,7 @@ do
     --d_model 256 \
     --des 'Exp' \
     --seed $SEED \
-    --decoder_type noNorm \
+    --no_zero_norm \
     --itr 1
 
   done 

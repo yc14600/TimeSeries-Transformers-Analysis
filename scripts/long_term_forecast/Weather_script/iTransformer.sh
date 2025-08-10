@@ -1,6 +1,6 @@
 model_name=iTransformer
-SEEDS=(42 123 456 789 2021)
-PRED_LENS=(96 192 336 720)
+SEEDS=(42)
+PRED_LENS=(96)
 
 
 
@@ -31,7 +31,8 @@ do
       --d_model 512\
       --d_ff 512\
       --itr 1 \
-      --train_epochs 10 \
+      --train_epochs 1 \
+      --no_zero_norm \
       --n_heads 1
 
     done

@@ -157,6 +157,8 @@ class Model(nn.Module):
                                                    configs.dropout)
         self.fuse_decoder = configs.fuse_decoder
         self.decoder_type = configs.decoder_type
+        self.no_zero_norm = configs.no_zero_norm
+        
         # Encoder-only architecture
         self.encoder = Encoder(
             [
@@ -214,7 +216,7 @@ class Model(nn.Module):
 
 
     def forecast_multi(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
-        if self.decoder_type != 'noNorm':
+        if not self.no_zero_norm:
             # Normalization from Non-stationary Transformer
             means = x_enc.mean(1, keepdim=True).detach()
             x_enc = x_enc - means
@@ -234,7 +236,7 @@ class Model(nn.Module):
         dec_out = self.head(enc_out)  # z: [bs x nvars x target_window]
         dec_out = dec_out.permute(0, 2, 1)
 
-        if self.decoder_type != 'noNorm':
+        if not self.no_zero_norm:
             # De-Normalization from Non-stationary Transformer
             dec_out = dec_out * (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
             dec_out = dec_out + (means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))

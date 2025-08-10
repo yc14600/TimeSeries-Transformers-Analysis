@@ -32,7 +32,7 @@ do
       --d_model 128\
       --d_ff 128\
       --itr 1 \
-      --decoder_type noNorm \
+      --no_zero_norm \
       --train_epochs 10
 
     python -u run.py \
@@ -58,7 +58,7 @@ do
       --d_model 128\
       --d_ff 128\
       --itr 1 \
-      --decoder_type noNorm \
+      --no_zero_norm \
       --train_epochs 10
 
     python -u run.py \
@@ -84,8 +84,8 @@ do
       --d_model 128\
       --d_ff 128\
       --itr 1 \
-      --decoder_type noNorm \
-      --train_epochs 10   
+      --no_zero_norm \
+      --train_epochs 10
 
     python -u run.py \
       --task_name long_term_forecast \
@@ -110,7 +110,7 @@ do
       --d_model 128\
       --d_ff 128\
       --itr 1 \
-      --decoder_type noNorm \
+      --no_zero_norm \
       --train_epochs 10
 
     python -u est_mi.py \
@@ -136,7 +136,7 @@ do
       --d_model 128\
       --d_ff 128\
       --itr 1 \
-      --decoder_type noNorm \
+      --no_zero_norm \
       --train_epochs 10
 
     python -u est_mi.py \
@@ -162,7 +162,7 @@ do
       --d_model 128\
       --d_ff 128\
       --itr 1 \
-      --decoder_type noNorm \
+      --no_zero_norm \
       --train_epochs 10
 
     python -u est_mi.py \
@@ -188,8 +188,8 @@ do
       --d_model 128\
       --d_ff 128\
       --itr 1 \
-      --decoder_type noNorm \
-      --train_epochs 10   
+      --no_zero_norm \
+      --train_epochs 10
 
     python -u est_mi.py \
       --task_name long_term_forecast \
@@ -214,7 +214,7 @@ do
       --d_model 128\
       --d_ff 128\
       --itr 1 \
-      --decoder_type noNorm \
-      --train_epochs 10   
+      --no_zero_norm \
+      --train_epochs 10
   done
 done

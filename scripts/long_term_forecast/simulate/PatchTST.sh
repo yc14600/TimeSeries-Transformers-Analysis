@@ -29,7 +29,7 @@ do
       --des 'Exp' \
       --itr 1 \
       --n_heads 8 \
-      --decoder_type noNorm \
+      --no_zero_norm \
       --train_epochs 10
 
     python -u run.py \
@@ -54,7 +54,7 @@ do
       --des 'Exp' \
       --itr 1 \
       --n_heads 8 \
-      --decoder_type noNorm \
+      --no_zero_norm \
       --train_epochs 10
 
     python -u run.py \
@@ -79,7 +79,7 @@ do
       --des 'Exp' \
       --itr 1 \
       --n_heads 8 \
-      --decoder_type noNorm \
+      --no_zero_norm \
       --train_epochs 10
 
 
@@ -105,7 +105,7 @@ do
       --des 'Exp' \
       --itr 1 \
       --n_heads 8 \
-      --decoder_type noNorm \
+      --no_zero_norm \
       --train_epochs 10
 
     python -u run.py \
@@ -130,7 +130,7 @@ do
       --des 'Exp' \
       --itr 1 \
       --n_heads 8 \
-      --decoder_type noNorm \
+      --no_zero_norm \
       --train_epochs 10
 
     python -u est_mi.py \
@@ -155,7 +155,7 @@ do
       --des 'Exp' \
       --itr 1 \
       --n_heads 8 \
-      --decoder_type noNorm \
+      --no_zero_norm \
       --train_epochs 10
 
     python -u est_mi.py \
@@ -180,7 +180,7 @@ do
       --des 'Exp' \
       --itr 1 \
       --n_heads 8 \
-      --decoder_type noNorm \
+      --no_zero_norm \
       --train_epochs 10
 
     python -u est_mi.py \
@@ -205,7 +205,7 @@ do
       --des 'Exp' \
       --itr 1 \
       --n_heads 8 \
-      --decoder_type noNorm \
+      --no_zero_norm \
       --train_epochs 10
 
 
@@ -231,7 +231,7 @@ do
       --des 'Exp' \
       --itr 1 \
       --n_heads 8 \
-      --decoder_type noNorm \
+      --no_zero_norm \
       --train_epochs 10
 
     python -u est_mi.py \
@@ -256,7 +256,7 @@ do
       --des 'Exp' \
       --itr 1 \
       --n_heads 8 \
-      --decoder_type noNorm \
+      --no_zero_norm \
       --train_epochs 10
   done
 done

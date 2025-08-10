@@ -25,6 +25,7 @@ class Model(nn.Module):
         self.task_name = configs.task_name
         self.output_attention = configs.output_attention
         self.decoder_type = configs.decoder_type
+        self.no_zero_norm = configs.no_zero_norm
 
         # The padding operation to handle invisible sgemnet length
         self.pad_in_len = ceil(1.0 * configs.seq_len / self.seg_len) * self.seg_len
@@ -89,7 +90,7 @@ class Model(nn.Module):
         return attns
 
     def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
-        if self.decoder_type == 'Norm':            
+        if not self.no_zero_norm:            
             means = x_enc.mean(1, keepdim=True).detach()
             x_enc = x_enc - means
             stdev = torch.sqrt(torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5).detach()
@@ -103,7 +104,7 @@ class Model(nn.Module):
 
         dec_in = repeat(self.dec_pos_embedding, 'b ts_d l d -> (repeat b) ts_d l d', repeat=x_enc.shape[0])
         dec_out = self.decoder(dec_in, enc_out)
-        if self.decoder_type == 'Norm':
+        if not self.no_zero_norm:
             dec_out = dec_out * (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
             dec_out = dec_out + (means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
 

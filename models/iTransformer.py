@@ -21,6 +21,7 @@ class Model(nn.Module):
         print('no_skip',self.no_skip)
         self.fuse_decoder = configs.fuse_decoder
         self.decoder_type = configs.decoder_type
+        self.no_zero_norm = configs.no_zero_norm
         
         # Embedding
         self.enc_embedding = DataEmbedding_inverted(configs.seq_len, configs.d_model, configs.embed, configs.freq,
@@ -76,7 +77,7 @@ class Model(nn.Module):
 
     def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
         # Normalization from Non-stationary Transformer
-        if self.decoder_type != 'noNorm':
+        if not self.no_zero_norm:
             
             means = x_enc.mean(1, keepdim=True).detach()
             x_enc = x_enc - means
@@ -102,7 +103,7 @@ class Model(nn.Module):
         dec_out = self.projection(enc_out)           
         dec_out = dec_out.permute(0, 2, 1)[:, :, :N]
         # De-Normalization from Non-stationary Transformer
-        if self.decoder_type != 'noNorm':
+        if not self.no_zero_norm:
             dec_out = dec_out * (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
             dec_out = dec_out + (means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
             

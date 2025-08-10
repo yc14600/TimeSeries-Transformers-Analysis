@@ -53,7 +53,7 @@ do
         --des 'Exp' \
         --d_ff 2048 \
         --batch_size 4 \
-        --decoder_type noNorm \
+        --no_zero_norm \
         --itr 1
         
       python -u est_mi_slow.py \
@@ -102,8 +102,8 @@ do
         --des 'Exp' \
         --d_ff 2048 \
         --batch_size 4 \
-        --decoder_type noNorm \
-        --itr 1        
-        
+        --no_zero_norm \
+        --itr 1
+
     done
 done

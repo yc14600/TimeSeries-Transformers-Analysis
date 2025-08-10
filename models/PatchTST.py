@@ -74,6 +74,7 @@ class Model(nn.Module):
         self.no_skip=configs.no_skip
         self.fuse_decoder=configs.fuse_decoder
         self.decoder_type=configs.decoder_type
+        self.no_zero_norm = configs.no_zero_norm
 
         # patching and embedding
         self.patch_embedding = PatchEmbedding(
@@ -131,7 +132,7 @@ class Model(nn.Module):
 
     def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
         # Normalization from Non-stationary Transformer
-        if self.decoder_type != 'noNorm':
+        if not self.no_zero_norm:
             means = x_enc.mean(1, keepdim=True).detach()
             x_enc = x_enc - means
             stdev = torch.sqrt(
@@ -157,7 +158,7 @@ class Model(nn.Module):
         dec_out = dec_out.permute(0, 2, 1)
 
         # De-Normalization from Non-stationary Transformer
-        if self.decoder_type != 'noNorm':
+        if not self.no_zero_norm:
             dec_out = dec_out * \
                     (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
             dec_out = dec_out + \

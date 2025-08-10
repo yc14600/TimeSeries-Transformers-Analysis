@@ -82,7 +82,7 @@ if __name__ == '__main__':
     parser.add_argument('--no_skip', default=False, action="store_true", help="NO skip connection in transformer")
     parser.add_argument('--fuse_decoder', default=False, action="store_true", help="Add a fuse layer to decoder projection")
     parser.add_argument('--decoder_type', type=str, default='conv2d', help="the type of the fuse layer in decoder projection, can be conv2d and MLP")
-
+    parser.add_argument('--no_zero_norm', default=False, action="store_true", help='whether to use zero normalization') 
     # PAttn
     parser.add_argument('--patch_size', type=int, default=16)
     parser.add_argument('--stride', type=int, default=8)
