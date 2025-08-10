@@ -1,4 +1,4 @@
-### The code of paper "A Closer Look at Transformers for Time Series Forecasting: Understanding Why They Work and Where They Struggle".
+## The code of paper "A Closer Look at Transformers for Time Series Forecasting: Understanding Why They Work and Where They Struggle".
 
 ### Introduction
 
@@ -29,14 +29,14 @@ Please find example scripts of running these files in the `script` folder. Speci
     `--no_zero_norm`: if it's True, zero-score normalization will be removed. Crossformer, iTransformer, PatchTST, and TimeXer used this configuration in the experiments included in the paper.
 
 ### Cite the paper
-@inproceedings{
-chen2025a,
-title={A Closer Look at Transformers for Time Series Forecasting: Understanding Why They Work and Where They Struggle},
-author={Yu Chen and Nathalia C{\'e}spedes and Payam Barnaghi},
-booktitle={Forty-second International Conference on Machine Learning},
-year={2025},
-url={https://openreview.net/forum?id=kHEVCfES4Q}
-}
+    @inproceedings{
+    chen2025a,
+    title={A Closer Look at Transformers for Time Series Forecasting: Understanding Why They Work and Where They Struggle},
+    author={Yu Chen and Nathalia C{\'e}spedes and Payam Barnaghi},
+    booktitle={Forty-second International Conference on Machine Learning},
+    year={2025},
+    url={https://openreview.net/forum?id=kHEVCfES4Q}
+    }
 
 ### Concat
 Please feel free to contact me by this email yc14600@gmail.com if you have any questions. 
