@@ -1,6 +1,6 @@
 model_name=FEDformer
 
-SEEDS=(42 123 456 789 1011)
+SEEDS=(42 123 456)
 PRED_LENS=(96 192 336 720)
 
 
@@ -119,27 +119,5 @@ do
       --des 'Exp' \
       --itr 1
 
-
-    python -u est_mi.py \
-      --task_name long_term_forecast \
-      --is_training 1 \
-      --root_path ./dataset/simulate/ \
-      --data_path dependent10.csv \
-      --model_id simulate_dp10_96_96 \
-      --model $model_name \
-      --data custom \
-      --features M \
-      --seq_len 96 \
-      --label_len 48 \
-      --pred_len $PRED_LEN \
-      --seed $SEED \
-      --e_layers 2 \
-      --d_layers 1 \
-      --factor 3 \
-      --enc_in 2 \
-      --dec_in 2 \
-      --c_out 2 \
-      --des 'Exp' \
-      --itr 1
   done
 done 

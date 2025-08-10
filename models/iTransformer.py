@@ -4,7 +4,6 @@ import torch.nn.functional as F
 from layers.Transformer_EncDec import Encoder, EncoderLayer
 from layers.SelfAttention_Family import FullAttention, AttentionLayer
 from layers.Embed import DataEmbedding_inverted
-import numpy as np
 
 
 class Model(nn.Module):
@@ -47,7 +46,6 @@ class Model(nn.Module):
             
             if configs.fuse_decoder:
                 print('add a fuse layer of decoder')
-                # self.projection = nn.Linear(configs.d_model * (4+configs.enc_in),configs.pred_len * (4+configs.enc_in))
                 if configs.decoder_type == 'conv2d':
                     kw = 8
                     self.fuse_proj = nn.Conv2d(
@@ -55,7 +53,6 @@ class Model(nn.Module):
                         out_channels=1,
                         kernel_size=(4+configs.enc_in,kw),
                         padding='same'
-                        # groups=1  # Ensure all channels are fused together
                     )
                 elif configs.decoder_type == 'MLP':
                     self.fuse_proj = nn.Sequential(nn.Linear(configs.d_model * (4+configs.enc_in),configs.d_model * (4+configs.enc_in),bias=True),nn.ReLU())
@@ -73,36 +70,24 @@ class Model(nn.Module):
     def get_attention(self, x_enc, x_mark_enc):
         # Embedding
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
-        # print('enc_out 0',enc_out.shape)
         enc_out, attns = self.encoder(enc_out, attn_mask=None)
         return attns
     
 
     def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
         # Normalization from Non-stationary Transformer
-        # print('x_enc 0',x_enc.shape,x_mark_enc.shape)
         if self.decoder_type != 'noNorm':
             
             means = x_enc.mean(1, keepdim=True).detach()
-            # print('means',means.shape)  
             x_enc = x_enc - means
             stdev = torch.sqrt(torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5).detach()
-            # print('stdev',stdev.shape)  
             x_enc = x_enc / stdev
-        # print('x_enc 1',x_enc.shape,x_mark_enc.shape)   
         _, _, N = x_enc.shape
 
         # Embedding
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
-        # print('enc_out 0',enc_out.shape)
         enc_out, attns = self.encoder(enc_out, attn_mask=None)
-        # print('enc_out 1',enc_out.shape)
         if self.fuse_decoder:
-            # s1,s2,s3 = enc_out.shape
-            # enc_out = enc_out.view(s1,s2*s3)
-            # # print('enc_out flat',enc_out.shape)
-            # flat_dec_out = self.projection(enc_out)
-            # dec_out = flat_dec_out.reshape(s1,s2,-1)
             if self.decoder_type == 'conv2d':
                 enc_out = enc_out.unsqueeze(1)
                 
@@ -111,7 +96,6 @@ class Model(nn.Module):
             elif self.decoder_type == 'MLP':
                 s1,s2,s3 = enc_out.shape
                 enc_out = enc_out.view(s1,s2*s3)
-                # print('enc_out flat',enc_out.shape)
                 flat_enc_out = self.fuse_proj(enc_out)
                 enc_out = flat_enc_out.reshape(s1,s2,-1)
 

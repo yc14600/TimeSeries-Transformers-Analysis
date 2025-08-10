@@ -14,24 +14,41 @@ class Transpose(nn.Module):
 
 
 class FlattenHead(nn.Module):
-    def __init__(self, n_vars, nf, target_window, head_dropout=0,fuse_decoder=False):
+    def __init__(self, n_vars, nf, target_window, head_dropout=0,fuse_decoder=False,decoder_type='conv2d'): 
         super().__init__()
         self.n_vars = n_vars
         self.flatten = nn.Flatten(start_dim=-2)
         self.linear = nn.Linear(nf, target_window)
         self.dropout = nn.Dropout(head_dropout)
         self.fuse_decoder = fuse_decoder
+        self.decoder_type = decoder_type
         if fuse_decoder:
             print('add a fuse layer of decoder')
-            self.flat_proj = nn.Sequential(nn.Linear(n_vars*nf,n_vars*nf),nn.ReLU())
+            if self.decoder_type == 'conv2d':
+                    kw = 8
+                    self.fuse_proj = nn.Conv2d(
+                        in_channels=1,
+                        out_channels=1,
+                        kernel_size=(4+self.n_vars,kw),
+                        padding='same'
+                        # groups=1  # Ensure all channels are fused together
+                    )
+            elif self.decoder_type == 'MLP':
+                self.flat_proj = nn.Sequential(nn.Linear(n_vars*nf,n_vars*nf),nn.ReLU())
 
     def forward(self, x):  # x: [bs x nvars x d_model x patch_num]
         x = self.flatten(x)
         if self.fuse_decoder:
-            s0,s1,s2 = x.shape
-            x = x.reshape(s0,s1*s2)
-            x = self.flat_proj(x)
-            x = x.reshape(s0,s1,s2)
+            if self.decoder_type == 'conv2d':
+                x = x.unsqueeze(1)                
+                x = self.fuse_proj(x)
+                x = x.squeeze(1)
+
+            elif self.decoder_type == 'MLP':
+                s0,s1,s2 = x.shape
+                x = x.reshape(s0,s1*s2)
+                x = self.flat_proj(x)
+                x = x.reshape(s0,s1,s2)
         x = self.linear(x)
         x = self.dropout(x)
         return x

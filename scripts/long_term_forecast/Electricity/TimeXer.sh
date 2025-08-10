@@ -9,7 +9,7 @@ do
     do
       python -u run.py \
         --task_name long_term_forecast \
-        --gpu 1 \
+        --gpu 0 \
         --is_training 1 \
         --root_path ./dataset/electricity/ \
         --data_path electricity.csv \
@@ -33,7 +33,7 @@ do
         
         python -u run.py \
         --task_name long_term_forecast \
-        --gpu 1 \
+        --gpu 0 \
         --is_training 1 \
         --root_path ./dataset/electricity/ \
         --data_path electricity.csv \
@@ -58,7 +58,7 @@ do
         
       python -u est_mi_slow.py \
         --task_name long_term_forecast \
-        --gpu 1 \
+        --gpu 0 \
         --is_training 1 \
         --root_path ./dataset/electricity/ \
         --data_path electricity.csv \
@@ -82,7 +82,7 @@ do
         
         python -u est_mi_slow.py \
         --task_name long_term_forecast \
-        --gpu 1 \
+        --gpu 0 \
         --is_training 1 \
         --root_path ./dataset/electricity/ \
         --data_path electricity.csv \

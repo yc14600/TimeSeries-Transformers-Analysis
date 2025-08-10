@@ -2,12 +2,9 @@ import argparse
 import os
 import torch
 from exp.exp_long_term_forecasting import Exp_Long_Term_Forecast
-from exp.exp_long_term_token_wrapper import Exp_Long_Term_Forecast_Token_Wrapper
 from exp.exp_imputation import Exp_Imputation
 from exp.exp_short_term_forecasting import Exp_Short_Term_Forecast
-from exp.exp_short_term_token_wrapper import Exp_Short_Term_Forecast_Token_Wrapper
 from exp.exp_anomaly_detection import Exp_Anomaly_Detection
-# from exp.exp_anomaly_token_wrapper import Exp_Anomaly_Detection_Token_Wrapper
 from exp.exp_classification import Exp_Classification
 from utils.print_args import print_args
 import random
@@ -154,24 +151,14 @@ if __name__ == '__main__':
     parser.add_argument('--max_trend_num', type=int, default=8, help='max number of trend segments')
     parser.add_argument('--max_freq_num', type=int, default=8, help='max number of frequency components')
        
-    # TimeTokenFormer specific arguments
-    parser.add_argument('--token_aggregate_func', type=str, default='mean', help='token aggregation function')  
-    parser.add_argument('--te_layers', type=int, default=2, help='number of token encoder layers of TimeTokenFormer') 
-    parser.add_argument('--cp_heads', type=int, default=4, help='number of heads of token component encoders')
-    parser.add_argument('--cp_d_ff', type=int, default=128, help='feedfoward layer of token component encoders')
-    parser.add_argument('--cp_d_model', type=int, default=96, help='embedding size of token component encoders')
-
-
     
     args = parser.parse_args()
-    # fix_seed = 2021
     seed = args.seed
     random.seed(seed)
     torch.manual_seed(seed)
     np.random.seed(seed)
     print('Seed:', seed)
     print('GPU available',torch.cuda.is_available())
-    # args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
     args.use_gpu = True if torch.cuda.is_available() else False
     if args.use_gpu:
         torch.cuda.manual_seed(seed)
@@ -192,16 +179,11 @@ if __name__ == '__main__':
     print('Task:', args.task_name)
 
     if args.task_name == 'long_term_forecast':
-        if args.model == 'TimeTokenFormer':
-            Exp = Exp_Long_Term_Forecast_Token_Wrapper
-        else:
-            Exp = Exp_Long_Term_Forecast
+        print('Long Term Forecast')
+        Exp = Exp_Long_Term_Forecast
     elif args.task_name == 'short_term_forecast':
         print('Short Term Forecast')
-        if args.model == 'TimeTokenFormer':
-            Exp = Exp_Short_Term_Forecast_Token_Wrapper
-        else:
-            Exp = Exp_Short_Term_Forecast
+        Exp = Exp_Short_Term_Forecast
 
     elif args.task_name == 'imputation':
         Exp = Exp_Imputation

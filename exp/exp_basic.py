@@ -1,7 +1,6 @@
 import os
 import torch
-import torch.distributed as dist
-from models import Autoformer, TimeTokenFormer, Transformer, TimesNet, Nonstationary_Transformer, DLinear, FEDformer, \
+from models import Autoformer, Transformer, TimesNet, Nonstationary_Transformer, DLinear, FEDformer, \
     Informer, LightTS, Reformer, ETSformer, Pyraformer, PatchTST, MICN, Crossformer, FiLM, iTransformer, \
     Koopa, TiDE, FreTS, TimeMixer, TSMixer, SegRNN, MambaSimple, TemporalFusionTransformer,PAttn,TimeXer
 
@@ -34,7 +33,6 @@ class Exp_Basic(object):
             'TSMixer': TSMixer,
             'SegRNN': SegRNN,
             'TemporalFusionTransformer': TemporalFusionTransformer,
-            'TimeTokenFormer': TimeTokenFormer,
             'PAttn':PAttn,
             'TimeXer':TimeXer
         }

@@ -17,7 +17,6 @@ class FlattenHead(nn.Module):
         self.decoder_type = decoder_type
         if self.fuse_decoder:
             print('add a fuse layer of decoder')
-            # self.projection = nn.Linear(configs.d_model * (4+configs.enc_in),configs.pred_len * (4+configs.enc_in))
             if self.decoder_type == 'conv2d':
                 kw = 8
                 self.fuse_proj = nn.Conv2d(
@@ -25,7 +24,6 @@ class FlattenHead(nn.Module):
                     out_channels=1,
                     kernel_size=(4+n_vars,kw),
                     padding='same'
-                    # groups=1  # Ensure all channels are fused together
                 )
             elif self.decoder_type == 'MLP':
                 self.fuse_proj = nn.Linear(n_vars*nf,n_vars*nf)
@@ -35,20 +33,13 @@ class FlattenHead(nn.Module):
         x = self.flatten(x)
         
         if self.fuse_decoder:
-            # s1,s2,s3 = enc_out.shape
-            # enc_out = enc_out.view(s1,s2*s3)
-            # # print('enc_out flat',enc_out.shape)
-            # flat_dec_out = self.projection(enc_out)
-            # dec_out = flat_dec_out.reshape(s1,s2,-1)
             if self.decoder_type == 'conv2d':
-                x = x.unsqueeze(1)
-                
+                x = x.unsqueeze(1)               
                 x = self.fuse_proj(x)
                 x = x.squeeze(1)
             elif self.decoder_type == 'MLP':
                 s1,s2,s3 = x.shape
                 x = x.view(s1,s2*s3)
-                # print('x flat',x.shape)
                 flat_x = self.fuse_proj(x)
                 x = flat_x.reshape(s1,s2,-1)
             

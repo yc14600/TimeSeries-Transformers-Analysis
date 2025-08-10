@@ -1,6 +1,5 @@
 from data_provider.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_Custom, Dataset_M4, PSMSegLoader, \
     MSLSegLoader, SMAPSegLoader, SMDSegLoader, SWATSegLoader, UEAloader, Dataset_PEMS
-from data_tokenizer.data_wrapper import Dataset_Custom_Wrapper
 from data_provider.uea import collate_fn
 from torch.utils.data import DataLoader
 
@@ -39,8 +38,6 @@ def data_provider(args, flag,drop_last=False):
             win_size=args.seq_len,
             flag=flag,
         )
-        if args.model == 'TimeTokenFormer':
-            data_set = Dataset_Custom_Wrapper(args,dataset=data_set)
         
         data_loader = DataLoader(
             data_set,
@@ -56,8 +53,6 @@ def data_provider(args, flag,drop_last=False):
             root_path=args.root_path,
             flag=flag,
         )
-        if args.model == 'TimeTokenFormer':
-            data_set = Dataset_Custom_Wrapper(args,dataset=data_set)
 
         data_loader = DataLoader(
             data_set,
@@ -82,11 +77,8 @@ def data_provider(args, flag,drop_last=False):
             timeenc=timeenc,
             freq=freq,
             seasonal_patterns=args.seasonal_patterns
-        )
-        # print(flag, len(data_set.data_x))
-        
-        if args.model == 'TimeTokenFormer' and args.data != 'm4':
-            data_set = Dataset_Custom_Wrapper(args,dataset=data_set)
+        )        
+
 
         data_loader = DataLoader(
             data_set,

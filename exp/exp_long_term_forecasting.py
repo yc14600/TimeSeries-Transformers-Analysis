@@ -1,7 +1,6 @@
 from data_provider.data_factory import data_provider
 from exp.exp_basic import Exp_Basic
 from utils.tools import EarlyStopping, adjust_learning_rate, visual
-# from utils.metrics import metric
 import torch
 import torch.nn as nn
 from torch import optim
@@ -9,9 +8,6 @@ import os
 import time
 import warnings
 import numpy as np
-# from utils.dtw_metric import dtw,accelerated_dtw
-# from utils.augmentation import run_augmentation,run_augmentation_single
-#from memory_profiler import memory_usage
 from torch.nn import L1Loss,MSELoss
 
 warnings.filterwarnings('ignore')
@@ -83,7 +79,6 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         # decoder input
         dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :],device=self.device).float()
         dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
-        # print('batch_x:',batch_x.shape,'batch_y:',batch_y.shape,'batch_x_mark:',batch_x_mark.shape,'dec_inp:',dec_inp.shape,'batch_y_mark:',batch_y_mark.shape)
         return batch_x,batch_y, batch_x_mark, dec_inp, batch_y_mark
     
     
@@ -116,7 +111,6 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         model_optim.zero_grad()
         
         outputs, batch_y = self.model_feed_loop(data_batch,train=True)
-        # print('outputs:',outputs.shape,'batch_y:',batch_y.shape)
         loss = criterion(outputs, batch_y)
         train_loss.append(loss.item())
 
@@ -193,17 +187,14 @@ class Exp_Long_Term_Forecast(Exp_Basic):
             test_data, test_loader = self._get_data(flag='test')               
         else:
             test_data, test_loader = self.test_data, self.test_loader
-        # test_data.data_x = test_data.data_x.to(self.device)
-        # test_data.data_y = test_data.data_y.to(self.device)
-        # test_data.data_stamp = test_data.data_stamp.to(self.device)
+
         if test:
             model_path = os.path.join(self.args.checkpoints, setting,'checkpoint.pth')
             if os.path.exists(model_path):
                 print('loading model')
                 self.model.load_state_dict(torch.load(os.path.join(self.args.checkpoints, setting,'checkpoint.pth'),map_location=self.device))
                 self.model = self.model.to(self.device)
-        preds = []
-        trues = []
+
         folder_path = os.path.join(root_path,'test_results/',setting + '/')
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
@@ -228,54 +219,19 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 tot_mse += mse_i
         mae = tot_mae / len(test_loader)
         mse = tot_mse / len(test_loader)
-        # preds = torch.concat(preds, dim=0)
-        # trues = torch.concat(trues, dim=0)
-        # print('test shape:', preds.shape, trues.shape)
-        # preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
-        # trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
-        # print('test shape:', preds.shape, trues.shape)
 
-        # if self.args.data == 'PEMS':
-        #     B, T, C = preds.shape
-        #     preds = test_data.inverse_transform(preds.reshape(-1, C)).reshape(B, T, C)
-        #     trues = test_data.inverse_transform(trues.reshape(-1, C)).reshape(B, T, C)
         # result save
         folder_path = os.path.join(root_path,'results',setting + '/') 
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
         
-        # dtw calculation
-        # if self.args.use_dtw:
-        #     dtw_list = []
-        #     manhattan_distance = lambda x, y: np.abs(x - y)
-        #     for i in range(preds.shape[0]):
-        #         x = preds[i].reshape(-1,1)
-        #         y = trues[i].reshape(-1,1)
-        #         if i % 100 == 0:
-        #             print("calculating dtw iter:", i)
-        #         d, _, _, _ = accelerated_dtw(x, y, dist=manhattan_distance)
-        #         dtw_list.append(d)
-        #     dtw = np.array(dtw_list).mean()
-        # else:
-        #     dtw = -999
-            
-
-        # mae, mse, rmse, mape, mspe = metric(preds.cpu().numpy(), trues.cpu().numpy())
         print('mse:{}, mae:{}'.format(mse, mae))
-        # print('mse{},mae:{}, mape1:{}, rmse:{},mspe:{}'.format(mse,mae, mape, rmse,mspe))            
         f = open("result_long_term_forecast.txt", 'a')
         f.write(setting + "  \n")
-        # if self.args.data == 'PEMS':
-        #     f.write('mse{},mae:{}, mape:{}, rmse:{}'.format(mse,mae, mape, rmse))
-        # else:
         f.write('mse:{}, mae:{}'.format(mse, mae))
         f.write('\n')
         f.write('\n')
         f.close()
-
-        # np.save(folder_path + 'metrics.npy', np.array([mae, mse, rmse, mape, mspe]))
-        # np.save(folder_path + 'pred.npy', preds)
-        # np.save(folder_path + 'true.npy', trues)
 
         return mse, mae
     

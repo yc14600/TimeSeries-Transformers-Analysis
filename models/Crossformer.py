@@ -91,10 +91,8 @@ class Model(nn.Module):
     def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
         if self.decoder_type == 'Norm':            
             means = x_enc.mean(1, keepdim=True).detach()
-            # print('means',means.shape)  
             x_enc = x_enc - means
             stdev = torch.sqrt(torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5).detach()
-            # print('stdev',stdev.shape)  
             x_enc = x_enc / stdev
         # embedding
         x_enc, n_vars = self.enc_value_embedding(x_enc.permute(0, 2, 1))

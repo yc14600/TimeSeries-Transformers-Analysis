@@ -153,7 +153,6 @@ class AutoCorrelationLayer(nn.Module):
         queries = self.query_projection(queries).view(B, L, H, -1)
         keys = self.key_projection(keys).view(B, S, H, -1)
         values = self.value_projection(values).view(B, S, H, -1)
-
         out, attn = self.inner_correlation(
             queries,
             keys,

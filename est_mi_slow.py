@@ -2,13 +2,10 @@ import argparse
 import os
 import torch
 from exp.exp_long_term_forecasting import Exp_Long_Term_Forecast
-from exp.exp_long_term_token_wrapper import Exp_Long_Term_Forecast_Token_Wrapper
 from exp.exp_imputation import Exp_Imputation
 from exp.exp_short_term_forecasting import Exp_Short_Term_Forecast
-from exp.exp_short_term_token_wrapper import Exp_Short_Term_Forecast_Token_Wrapper
 from exp.exp_anomaly_detection import Exp_Anomaly_Detection
 from utils.metrics import metric
-# from exp.exp_anomaly_token_wrapper import Exp_Anomaly_Detection_Token_Wrapper
 from exp.exp_classification import Exp_Classification
 from utils.print_args import print_args
 import random
@@ -156,25 +153,14 @@ if __name__ == '__main__':
     parser.add_argument('--outlier_threshold', type=float, default=2.0, help='threshold for outlier detection')
     parser.add_argument('--max_trend_num', type=int, default=8, help='max number of trend segments')
     parser.add_argument('--max_freq_num', type=int, default=8, help='max number of frequency components')
-       
-    # TimeTokenFormer specific arguments
-    parser.add_argument('--token_aggregate_func', type=str, default='mean', help='token aggregation function')  
-    parser.add_argument('--te_layers', type=int, default=2, help='number of token encoder layers of TimeTokenFormer') 
-    parser.add_argument('--cp_heads', type=int, default=4, help='number of heads of token component encoders')
-    parser.add_argument('--cp_d_ff', type=int, default=128, help='feedfoward layer of token component encoders')
-    parser.add_argument('--cp_d_model', type=int, default=96, help='embedding size of token component encoders')
-
-
-    
+ 
     args = parser.parse_args()
-    # fix_seed = 2021
     seed = args.seed
     random.seed(seed)
     torch.manual_seed(seed)
     np.random.seed(seed)
     print('Seed:', seed)
     print('GPU available',torch.cuda.is_available())
-    # args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
     args.use_gpu = True if torch.cuda.is_available() else False
     if args.use_gpu:
         torch.cuda.manual_seed(seed)
@@ -195,16 +181,11 @@ if __name__ == '__main__':
     print('Task:', args.task_name)
 
     if args.task_name == 'long_term_forecast':
-        if args.model == 'TimeTokenFormer':
-            Exp = Exp_Long_Term_Forecast_Token_Wrapper
-        else:
-            Exp = Exp_Long_Term_Forecast
+        print('Long Term Forecast')
+        Exp = Exp_Long_Term_Forecast
     elif args.task_name == 'short_term_forecast':
         print('Short Term Forecast')
-        if args.model == 'TimeTokenFormer':
-            Exp = Exp_Short_Term_Forecast_Token_Wrapper
-        else:
-            Exp = Exp_Short_Term_Forecast
+        Exp = Exp_Short_Term_Forecast
 
     elif args.task_name == 'imputation':
         Exp = Exp_Imputation
@@ -245,8 +226,6 @@ if __name__ == '__main__':
     exp = Exp(args)  # set experiments
     print('device:', exp.device)    
     print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
-    # mse,mae = exp.test(setting, test=1)
-    # print('testing done')
     print('loading model')
     exp.model.load_state_dict(torch.load(os.path.join(exp.args.checkpoints, setting,'checkpoint.pth'),map_location=exp.device))
     exp.model = exp.model.to(exp.device)
@@ -254,9 +233,6 @@ if __name__ == '__main__':
     print('model loaded')
     
     test_data, test_loader = exp._get_data(flag='test')
-    # test_data.data_x = test_data.data_x.to(exp.device)
-    # test_data.data_y = test_data.data_y.to(exp.device)
-    # test_data.data_stamp = test_data.data_stamp.to(exp.device)
     self_mi, cross_mi = 0., 0.
 
     preds = []
@@ -272,21 +248,7 @@ if __name__ == '__main__':
 
     
     with torch.no_grad():
-        for i, data_batch in enumerate(test_loader):
-            # outputs, batch_y = exp.model_feed_loop(data_batch)
-            # outputs = outputs.detach()
-            # batch_y = batch_y.detach()
-            # if test_data.scale and exp.args.inverse:
-            #     shape = outputs.shape
-            #     outputs = test_data.inverse_transform(outputs.reshape(shape[0] * shape[1], -1)).reshape(shape)
-            #     batch_y = test_data.inverse_transform(batch_y.reshape(shape[0] * shape[1], -1)).reshape(shape)
-
-            # pred = outputs.cpu().numpy()
-            # true = batch_y.cpu().numpy()
-            
-            # preds.append(pred)
-            # trues.append(true)
-            
+        for i, data_batch in enumerate(test_loader):           
             batch_x,batch_y, batch_x_mark, dec_inp, batch_y_mark = exp.prepare_batch(data_batch)
             
             expanded_shape = [batch_x.shape[0],args.seq_len]
@@ -295,38 +257,16 @@ if __name__ == '__main__':
             
             sdv = torch.zeros((args.enc_in,args.enc_in),device=exp.device)
             for fid in range(args.enc_in):  
-            # feature_indices = torch.arange(args.enc_in,device=exp.device).view(1, args.enc_in, 1, 1).expand(args.batch_size, -1, args.seq_len, args.enc_in)
-            # feature_indices_last = torch.arange(args.enc_in,device=exp.device).view(1, 1, 1, args.enc_in).expand(args.batch_size, args.enc_in, args.seq_len, -1)
-            # mask = feature_indices == feature_indices_last  # Shape: [N, F, L, F]
-            # mask = mask.to(exp.device)
-            
-
-
-                rp3 = batch_x[:,:,fid]
-            
-            # batch_x_mark_expand = batch_x_mark.unsqueeze(1).expand(-1, args.enc_in, -1, -1)       
-            # batch_x_mark_expand = batch_x_mark_expand.reshape(args.batch_size * args.enc_in, args.seq_len, batch_x_mark.shape[-1])
-            # if dec_inp is not None:
-            # print('dec_inp:',dec_inp.shape)
-            # dec_inp = dec_inp.unsqueeze(1).expand(-1, args.enc_in, -1, -1) 
-            # dec_inp = dec_inp.reshape(args.batch_size * args.enc_in, dec_inp.shape[-2], dec_inp.shape[-1])
-            # if batch_y_mark is not None:
-            # print('batch_y_mark:',batch_y_mark.shape)
-            # batch_y_mark = batch_y_mark.unsqueeze(1).expand(-1, args.enc_in, -1, -1)  
-            # batch_y_mark = batch_y_mark.reshape(args.batch_size * args.enc_in, batch_y_mark.shape[-2], batch_y_mark.shape[-1])  
-            
+                rp3 = batch_x[:,:,fid]           
                 new_outputs = torch.empty(3,batch_x.shape[0], args.pred_len, args.enc_in,device=exp.device)
                 with torch.no_grad():
                     for n,rp in enumerate([rp1,rp2, rp3]):
-                        # print(n,'rp:',rp.shape)
                         x_replaced = replace_each_feature(batch_x,rp,feature_id=fid,device=exp.device)
 
                         rp_inputs = x_replaced.view(batch_x.shape[0], args.seq_len, args.enc_in)
                         new_outputs[n] = exp.model(rp_inputs,batch_x_mark,dec_inp,batch_y_mark)
                         
-                        # print('rp_outputs:',rp_outputs.shape)
             
-                # new_outputs = new_outputs + [outputs]
                 tot = torch.std(new_outputs,dim=0)                
                 sdv[fid] = tot.mean(dim=0).mean(dim=0)
                 
@@ -334,23 +274,13 @@ if __name__ == '__main__':
             self_mi += (sdv * eye_mask).sum()/sdv.shape[0]
             cross_mi += (sdv * (1-eye_mask)).sum()/(sdv.shape[0]*(sdv.shape[0]-1))
             cross_mi_mt += (sdv * (1-eye_mask))
-            if (i+1)==10:
+            if (i+1)==100:
                 break
     cross_mi_mt /= (i+1)
     max_cross_mi = (cross_mi_mt * (1-eye_mask)).max()       
     self_mi/=(i+1)
     cross_mi/=(i+1)
     print('iters',i+1,'Self MI:', self_mi, 'Cross MI:', cross_mi,'max cross MI', max_cross_mi)
-        
-    # preds = np.concatenate(preds, axis=0)
-    # trues = np.concatenate(trues, axis=0)
-    # print('test shape:', preds.shape, trues.shape)
-    # preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
-    # trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
-    # print('test shape:', preds.shape, trues.shape)
-    
-    # mae, mse, rmse, mape, mspe = metric(preds, trues)
-    # print('mse:{}, mae:{}'.format(mse, mae))
     
     with open('./eval_results/mi_results.txt','a') as f:
         f.write(setting + "  \n")
