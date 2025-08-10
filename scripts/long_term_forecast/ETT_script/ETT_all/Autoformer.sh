@@ -2,15 +2,16 @@ model_name=Autoformer
 SEEDS=(42 123 456)
 PRED_LENS=(96 192 336 720)
 
-
+GPU=1
 
 for SEED in "${SEEDS[@]}"
 do
   for PRED_LEN in "${PRED_LENS[@]}"
   do
-    python -u run.py \
+    python -u est_mi.py \
       --task_name long_term_forecast \
       --is_training 1 \
+      --gpu $GPU \
       --root_path ./dataset/ETT-small/ \
       --data_path ETTh1.csv \
       --model_id ETTh1_96 \
@@ -28,11 +29,13 @@ do
       --dec_in 7 \
       --c_out 7 \
       --des 'Exp' \
+      --batch_size 16 \
       --itr 1
     
-    python -u run.py \
+    python -u est_mi.py \
       --task_name long_term_forecast \
       --is_training 1 \
+      --gpu $GPU \
       --root_path ./dataset/ETT-small/ \
       --data_path ETTh2.csv \
       --model_id ETTh2_96 \
@@ -50,11 +53,13 @@ do
       --dec_in 7 \
       --c_out 7 \
       --des 'Exp' \
+      --batch_size 16 \
       --itr 1
     
-    python -u run.py \
+    python -u est_mi.py \
       --task_name long_term_forecast \
       --is_training 1 \
+      --gpu $GPU \
       --root_path ./dataset/ETT-small/ \
       --data_path ETTm1.csv \
       --model_id ETTm1_96 \
@@ -72,11 +77,13 @@ do
       --dec_in 7 \
       --c_out 7 \
       --des 'Exp' \
+      --batch_size 16 \
       --itr 1
 
-    python -u run.py \
+    python -u est_mi.py \
       --task_name long_term_forecast \
       --is_training 1 \
+      --gpu $GPU \
       --root_path ./dataset/ETT-small/ \
       --data_path ETTm2.csv \
       --model_id ETTm2_96 \
@@ -94,6 +101,7 @@ do
       --dec_in 7 \
       --c_out 7 \
       --des 'Exp' \
+      --batch_size 16 \
       --itr 1
   done
 done

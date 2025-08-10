@@ -1,7 +1,9 @@
-model_name=PatchTST
+model_name=iTransformer
 
 SEEDS=(42 123 456)
 PRED_LENS=(96 192 336 720)
+
+
 
 for SEED in "${SEEDS[@]}"
 do
@@ -10,11 +12,11 @@ do
     python -u run.py \
       --task_name long_term_forecast \
       --is_training 1 \
-      --root_path ./dataset/simulate/ \
-      --data_path independent_alpha95.csv \
-      --model_id simulate_idp_96_96 \
+      --root_path ./dataset/ETT-small/ \
+      --data_path ETTh1.csv \
+      --model_id ETTh1_96_96 \
       --model $model_name \
-      --data custom \
+      --data ETTh1 \
       --features M \
       --seq_len 96 \
       --label_len 48 \
@@ -23,23 +25,24 @@ do
       --e_layers 2 \
       --d_layers 1 \
       --factor 3 \
-      --enc_in 2 \
-      --dec_in 2 \
-      --c_out 2 \
+      --enc_in 7 \
+      --dec_in 7 \
+      --c_out 7 \
       --des 'Exp' \
+      --d_model 128\
+      --d_ff 128\
       --itr 1 \
-      --n_heads 8 \
       --decoder_type noNorm \
       --train_epochs 10
 
     python -u run.py \
       --task_name long_term_forecast \
       --is_training 1 \
-      --root_path ./dataset/simulate/ \
-      --data_path dependent_alpha95_gamma20.csv \
-      --model_id simulate_dp02_96_96 \
+      --root_path ./dataset/ETT-small/ \
+      --data_path ETTh2.csv \
+      --model_id ETTh2_96_96 \
       --model $model_name \
-      --data custom \
+      --data ETTh2 \
       --features M \
       --seq_len 96 \
       --label_len 48 \
@@ -48,23 +51,24 @@ do
       --e_layers 2 \
       --d_layers 1 \
       --factor 3 \
-      --enc_in 2 \
-      --dec_in 2 \
-      --c_out 2 \
+      --enc_in 7 \
+      --dec_in 7 \
+      --c_out 7 \
       --des 'Exp' \
+      --d_model 128\
+      --d_ff 128\
       --itr 1 \
-      --n_heads 8 \
       --decoder_type noNorm \
       --train_epochs 10
 
     python -u run.py \
       --task_name long_term_forecast \
       --is_training 1 \
-      --root_path ./dataset/simulate/ \
-      --data_path dependent_alpha95_gamma40.csv \
-      --model_id simulate_dp04_96_96 \
+      --root_path ./dataset/ETT-small/ \
+      --data_path ETTm1.csv \
+      --model_id ETTm1_96_96 \
       --model $model_name \
-      --data custom \
+      --data ETTm1 \
       --features M \
       --seq_len 96 \
       --label_len 48 \
@@ -73,24 +77,24 @@ do
       --e_layers 2 \
       --d_layers 1 \
       --factor 3 \
-      --enc_in 2 \
-      --dec_in 2 \
-      --c_out 2 \
+      --enc_in 7 \
+      --dec_in 7 \
+      --c_out 7 \
       --des 'Exp' \
+      --d_model 128\
+      --d_ff 128\
       --itr 1 \
-      --n_heads 8 \
       --decoder_type noNorm \
-      --train_epochs 10
-
+      --train_epochs 10   
 
     python -u run.py \
       --task_name long_term_forecast \
       --is_training 1 \
-      --root_path ./dataset/simulate/ \
-      --data_path dependent_alpha95_gamma60.csv \
-      --model_id simulate_dp06_96_96 \
+      --root_path ./dataset/ETT-small/ \
+      --data_path ETTm2.csv \
+      --model_id ETTm2_96_96 \
       --model $model_name \
-      --data custom \
+      --data ETTm2 \
       --features M \
       --seq_len 96 \
       --label_len 48 \
@@ -99,48 +103,24 @@ do
       --e_layers 2 \
       --d_layers 1 \
       --factor 3 \
-      --enc_in 2 \
-      --dec_in 2 \
-      --c_out 2 \
+      --enc_in 7 \
+      --dec_in 7 \
+      --c_out 7 \
       --des 'Exp' \
+      --d_model 128\
+      --d_ff 128\
       --itr 1 \
-      --n_heads 8 \
-      --decoder_type noNorm \
-      --train_epochs 10
-
-    python -u run.py \
-      --task_name long_term_forecast \
-      --is_training 1 \
-      --root_path ./dataset/simulate/ \
-      --data_path dependent_alpha95_gamma80.csv \
-      --model_id simulate_dp08_96_96 \
-      --model $model_name \
-      --data custom \
-      --features M \
-      --seq_len 96 \
-      --label_len 48 \
-      --pred_len $PRED_LEN \
-      --seed $SEED \
-      --e_layers 2 \
-      --d_layers 1 \
-      --factor 3 \
-      --enc_in 2 \
-      --dec_in 2 \
-      --c_out 2 \
-      --des 'Exp' \
-      --itr 1 \
-      --n_heads 8 \
       --decoder_type noNorm \
       --train_epochs 10
 
     python -u est_mi.py \
       --task_name long_term_forecast \
       --is_training 1 \
-      --root_path ./dataset/simulate/ \
-      --data_path independent_alpha95.csv \
-      --model_id simulate_idp_96_96 \
+      --root_path ./dataset/ETT-small/ \
+      --data_path ETTh1.csv \
+      --model_id ETTh1_96_96 \
       --model $model_name \
-      --data custom \
+      --data ETTh1 \
       --features M \
       --seq_len 96 \
       --label_len 48 \
@@ -149,23 +129,24 @@ do
       --e_layers 2 \
       --d_layers 1 \
       --factor 3 \
-      --enc_in 2 \
-      --dec_in 2 \
-      --c_out 2 \
+      --enc_in 7 \
+      --dec_in 7 \
+      --c_out 7 \
       --des 'Exp' \
+      --d_model 128\
+      --d_ff 128\
       --itr 1 \
-      --n_heads 8 \
       --decoder_type noNorm \
       --train_epochs 10
 
     python -u est_mi.py \
       --task_name long_term_forecast \
       --is_training 1 \
-      --root_path ./dataset/simulate/ \
-      --data_path dependent_alpha95_gamma20.csv \
-      --model_id simulate_dp02_96_96 \
+      --root_path ./dataset/ETT-small/ \
+      --data_path ETTh2.csv \
+      --model_id ETTh2_96_96 \
       --model $model_name \
-      --data custom \
+      --data ETTh2 \
       --features M \
       --seq_len 96 \
       --label_len 48 \
@@ -174,23 +155,24 @@ do
       --e_layers 2 \
       --d_layers 1 \
       --factor 3 \
-      --enc_in 2 \
-      --dec_in 2 \
-      --c_out 2 \
+      --enc_in 7 \
+      --dec_in 7 \
+      --c_out 7 \
       --des 'Exp' \
+      --d_model 128\
+      --d_ff 128\
       --itr 1 \
-      --n_heads 8 \
       --decoder_type noNorm \
       --train_epochs 10
 
     python -u est_mi.py \
       --task_name long_term_forecast \
       --is_training 1 \
-      --root_path ./dataset/simulate/ \
-      --data_path dependent_alpha95_gamma40.csv \
-      --model_id simulate_dp04_96_96 \
+      --root_path ./dataset/ETT-small/ \
+      --data_path ETTm1.csv \
+      --model_id ETTm1_96_96 \
       --model $model_name \
-      --data custom \
+      --data ETTm1 \
       --features M \
       --seq_len 96 \
       --label_len 48 \
@@ -199,49 +181,24 @@ do
       --e_layers 2 \
       --d_layers 1 \
       --factor 3 \
-      --enc_in 2 \
-      --dec_in 2 \
-      --c_out 2 \
+      --enc_in 7 \
+      --dec_in 7 \
+      --c_out 7 \
       --des 'Exp' \
+      --d_model 128\
+      --d_ff 128\
       --itr 1 \
-      --n_heads 8 \
       --decoder_type noNorm \
-      --train_epochs 10
-
-
-    python -u est_mi.py \
-      --task_name long_term_forecast \
-      --is_training 1 \
-      --root_path ./dataset/simulate/ \
-      --data_path dependent_alpha95_gamma60.csv \
-      --model_id simulate_dp06_96_96 \
-      --model $model_name \
-      --data custom \
-      --features M \
-      --seq_len 96 \
-      --label_len 48 \
-      --pred_len $PRED_LEN \
-      --seed $SEED \
-      --e_layers 2 \
-      --d_layers 1 \
-      --factor 3 \
-      --enc_in 2 \
-      --dec_in 2 \
-      --c_out 2 \
-      --des 'Exp' \
-      --itr 1 \
-      --n_heads 8 \
-      --decoder_type noNorm \
-      --train_epochs 10
+      --train_epochs 10   
 
     python -u est_mi.py \
       --task_name long_term_forecast \
       --is_training 1 \
-      --root_path ./dataset/simulate/ \
-      --data_path dependent_alpha95_gamma80.csv \
-      --model_id simulate_dp08_96_96 \
+      --root_path ./dataset/ETT-small/ \
+      --data_path ETTm2.csv \
+      --model_id ETTm2_96_96 \
       --model $model_name \
-      --data custom \
+      --data ETTm2 \
       --features M \
       --seq_len 96 \
       --label_len 48 \
@@ -250,13 +207,14 @@ do
       --e_layers 2 \
       --d_layers 1 \
       --factor 3 \
-      --enc_in 2 \
-      --dec_in 2 \
-      --c_out 2 \
+      --enc_in 7 \
+      --dec_in 7 \
+      --c_out 7 \
       --des 'Exp' \
+      --d_model 128\
+      --d_ff 128\
       --itr 1 \
-      --n_heads 8 \
       --decoder_type noNorm \
-      --train_epochs 10
+      --train_epochs 10   
   done
 done

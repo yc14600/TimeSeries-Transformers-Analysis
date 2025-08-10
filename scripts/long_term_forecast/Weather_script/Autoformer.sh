@@ -1,6 +1,6 @@
 
 model_name=Autoformer
-SEEDS=(42 123 456)
+SEEDS=(42 123 456 789 2021)
 PRED_LENS=(96 192 336 720)
 
 for SEED in "${SEEDS[@]}"
