@@ -72,8 +72,6 @@ if __name__ == '__main__':
     parser.add_argument('--output_attention', action='store_true', help='whether to output attention in ecoder')
     parser.add_argument('--channel_independence', type=int, default=1,
                         help='0: channel dependence 1: channel independence for FreTS model')
-    parser.add_argument('--decomp_method', type=str, default='moving_avg',
-                        help='method of series decompsition, only support moving_avg or dft_decomp')
     parser.add_argument('--use_norm', type=int, default=1, help='whether to use normalize; True 1 False 0')
     parser.add_argument('--down_sampling_layers', type=int, default=0, help='num of down sampling layers')
     parser.add_argument('--down_sampling_window', type=int, default=1, help='down sampling window size')
@@ -138,19 +136,7 @@ if __name__ == '__main__':
     parser.add_argument('--wdba', default=False, action="store_true", help="Weighted DBA preset augmentation")
     parser.add_argument('--discdtw', default=False, action="store_true", help="Discrimitive DTW warp preset augmentation")
     parser.add_argument('--discsdtw', default=False, action="store_true", help="Discrimitive shapeDTW warp preset augmentation")
-    parser.add_argument('--extra_tag', type=str, default="", help="Anything extra")
-
-    # Decomposition
-    parser.add_argument('--filter_cutoff', type=float, default=0.02, help='filter cutoff for trend decomposition')
-    parser.add_argument('--filter_order', type=int, default=3, help='filter order for trend decomposition')
-    parser.add_argument('--double_smooth', type=bool, default=False, help='double smooth for trend decomposition')
-    parser.add_argument('--fs', type=float, default=1.0, help='sampling frequency for seasonal decomposition')
-    parser.add_argument('--trend_diff_thd', type=float, default=1e-3, help='threshold for trend difference')
-    parser.add_argument('--freq_energy_threshold', type=float, default=0.05, help='threshold for frequency energy')
-    parser.add_argument('--outlier_threshold', type=float, default=2.0, help='threshold for outlier detection')
-    parser.add_argument('--max_trend_num', type=int, default=8, help='max number of trend segments')
-    parser.add_argument('--max_freq_num', type=int, default=8, help='max number of frequency components')
-       
+    parser.add_argument('--extra_tag', type=str, default="", help="Anything extra")      
     
     args = parser.parse_args()
     seed = args.seed
